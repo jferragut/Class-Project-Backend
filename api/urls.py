@@ -2,8 +2,8 @@ from django.urls import include, path
 from . import views
 
 urlpatterns = [
-    path('games/', views.GamesView.as_view(), name='games'),
-    path('clean/', views.GamesView.as_view(), name='games'),
-    path('game/', views.GameView.as_view(), name='game'),
-    path('game/<int:game_id>', views.GameView.as_view(), name='game'),
+    path('user/', views.User.as_view(), name='user'),
+    path('user/watchlist', views.User.Watchlist.as_view(), name='watchlist'),
+    path('user/alerts', views.User.Alerts.as_view(), name='alerts'),
+    path('currencies/', views.Currencies.as_view(), name='currencies')
 ]
