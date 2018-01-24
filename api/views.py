@@ -74,10 +74,14 @@ class Currencies(APIView):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-        newCurrency = Currency(player1=body['player1'], player2=body['player2'], winner=body['winner'])
-        newGame.save()
+        newCurrency = Currency(currency_id=body['currency_id'],name=body['name'],symbol=body['symbol'],
+                      rank=body['rank'],price_usd=body['price_usd'],24h_volume_usd=body['24h_volume_usd'],
+                      market_cap_usd=body['market_cap_usd'],available_supply=body['available_supply'],
+                      total_supply=body['total_supply'],percent_change_1h=body['percent_change_1h'],
+                      percent_change_24h=body['percent_change_24h'],percent_change_7d=body['percent_change_7d'],last_updated=body['last_updated'])
+        newCurrency.save()
         
-        serializer = GameSerializer(newGame, many=False)
+        serializer = CurrencySerializer(newCurrency, many=False)
         return Response(serializer.data)
         
     def post(self, request, game_id):
@@ -98,9 +102,9 @@ class Currencies(APIView):
         serializer = GameSerializer(singleGame, many=False)
         return Response(serializer.data)
         
-    def delete(self, request, game_id):
+    def delete(self, request, currency_id):
         
-        singleGame = Game.objects.get(pk=game_id)
-        singleGame.delete()
+        singleCurrency = Currency.objects.get(pk=currency_id)
+        singleCurrency.delete()
         
         return Response("ok")
