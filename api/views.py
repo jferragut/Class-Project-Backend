@@ -12,12 +12,12 @@ from .serializable import CurrencySerializer
          
         
 class User(APIView):
-    def get(self, request, game_id):
+    def get(self, request, user_id):
         
-        # look for the game in the database
-        singleGame = Game.objects.get(pk=game_id)
+        # look for the User in the database
+        theUser = User.objects.get(pk=user_id)
         
-        serializer = GameSerializer(singleGame, many=False)
+        serializer = UserSerializer(theUser, many=False)
         return Response(serializer.data)
         
     def put(self, request):
@@ -26,34 +26,38 @@ class User(APIView):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-        newGame = Game(player1=body['player1'], player2=body['player2'], winner=body['winner'])
-        newGame.save()
+        newUser = User(firstname=body['firstname'],lastname=body['lastname'],email=body['email'],password=body['password'],
+                  email_contact=body['email_contact'],status=body['status'])
+        newUser.save()
         
-        serializer = GameSerializer(newGame, many=False)
+        serializer = UserSerializer(newUser, many=False)
         return Response(serializer.data)
         
-    def post(self, request, game_id):
+    def post(self, request, user_id):
         
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-        # Look for the game in the database and update the properties 
+        # Look for the user in the database and update the properties 
         # based on what came from the request
-        singleGame = Game.objects.get(pk=game_id)
-        singleGame.player1 = body['player1']
-        singleGame.player2 = body['player2']
-        singleGame.winner = body['winner']
-        singleGame.save()
+        theUser = Game.objects.get(pk=game_id)
+        theUser.firstname = body['firstname']
+        theUser.lastname = body['lastname']
+        theUser.email = body['email']
+        theUser.password = body['password']
+        theUser.email_contact = body['email_contact']
+        theUser.status = body['status']
+        theUser.save()
         
         # serialize the response object and pass it back
-        serializer = GameSerializer(singleGame, many=False)
+        serializer = UserSerializer(theUser, many=False)
         return Response(serializer.data)
         
-    def delete(self, request, game_id):
+    def delete(self, request, user_id):
         
-        singleGame = Game.objects.get(pk=game_id)
-        singleGame.delete()
+        theUser = User.objects.get(pk=user_id)
+        theUser.delete()
         
         return Response("ok")
         
@@ -92,14 +96,23 @@ class Currencies(APIView):
         
         # Look for the game in the database and update the properties 
         # based on what came from the request
-        singleGame = Game.objects.get(pk=game_id)
-        singleGame.player1 = body['player1']
-        singleGame.player2 = body['player2']
-        singleGame.winner = body['winner']
-        singleGame.save()
+        singleCurrency = Currency.objects.get(pk=currency_id)
+        singleCurrency.currency_id = body['currency_id']
+        singleCurrency.name = body['name']
+        singleCurrency.rank = body['rank']
+        singleCurrency.price_usd = body['price_usd']
+        singleCurrency.24h_volume_usd = body['24h_volume_usd']
+        singleCurrency.market_cap_usd = body['market_cap_usd']
+        singleCurrency.available_supply = body['available_supply']
+        singleCurrency.total_supply = body['total_supply']
+        singleCurrency.percent_change_1h = body['percent_change_1h']
+        singleCurrency.percent_change_24h = body['percent_change_24h']
+        singleCurrency.percent_change_7d = body['percent_change_7d']
+        singleCurrency.last_updated = body['last_updated']
+        singleCurrency.save()
         
         # serialize the response object and pass it back
-        serializer = GameSerializer(singleGame, many=False)
+        serializer = CurrencySerializer(singleCurrency, many=False)
         return Response(serializer.data)
         
     def delete(self, request, currency_id):
