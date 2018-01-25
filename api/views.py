@@ -1,21 +1,17 @@
-from rest_framework import status
 import json
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse
 
 #import models and serializer
-from .models import Currency
-from .models import User
-from .models import UserWatchlist
-from .serializable import CurrencySerializer
-from .serializable import UserWatchlistSerializer
-from .serializable import UserSerializer
+from .models import Currency, User, UserWatchlist
+from .serializable import CurrencySerializer, UserWatchlistSerializer, UserSerializer
 
 
          
         
-class User(APIView):
+class UserView(APIView):
     def get(self, request, user_id):
         
         # look for the User in the database
@@ -66,7 +62,7 @@ class User(APIView):
         return Response("ok")
         
         
-class UserWatchlist(APIView):
+class UserWatchlistView(APIView):
     def get(self, request, currency_id):
         
         # look for the Watchlist Items in the database
@@ -127,7 +123,7 @@ class UserWatchlist(APIView):
         
         
         
-class Currencies(APIView):
+class CurrenciesView(APIView):
     def get(self, request, game_id):
         
         # look for the currency in the database
