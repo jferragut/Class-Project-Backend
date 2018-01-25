@@ -8,10 +8,11 @@ $ sudo mv /usr/bin/python /usr/bin/python2
 $ sudo ln -s /usr/bin/python3 /usr/bin/python
 ```
 
-2) Download django
+2) Download django and rest_framework
 
 ```sh
 $ sudo pip install django
+$ sudo pip install djangorestframework
 ```
 
 3) Start a django website
