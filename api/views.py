@@ -6,7 +6,11 @@ from django.http import HttpResponse
 
 #import models and serializer
 from .models import Currency
+from .models import User
+from .models import UserWatchlist
 from .serializable import CurrencySerializer
+from .serializable import UserWatchlistSerializer
+from .serializable import UserSerializer
 
 
          
@@ -62,11 +66,11 @@ class User(APIView):
         return Response("ok")
         
         
-class User.Watchlist(APIView):
+class UserWatchlist(APIView):
     def get(self, request, currency_id):
         
         # look for the Watchlist Items in the database
-        watchlistItem = User.Watchlist.objects.get(pk=currency_id)
+        watchlistItem = UserWatchlist.objects.get(pk=currency_id)
         
         serializer = UserWatchlistSerializer(watchlistItem, many=False)
         return Response(serializer.data)
@@ -78,7 +82,7 @@ class User.Watchlist(APIView):
         body = json.loads(body_unicode)
         
         newWatchlistItem = User.Watchlist(currency_id=body['currency_id'],name=body['name'],symbol=body['symbol'],
-                      rank=body['rank'],price_usd=body['price_usd'],24h_volume_usd=body['24h_volume_usd'],
+                      rank=body['rank'],price_usd=body['price_usd'],volume_24h_usd=body['volume_24h_usd'],
                       market_cap_usd=body['market_cap_usd'],available_supply=body['available_supply'],
                       total_supply=body['total_supply'],percent_change_1h=body['percent_change_1h'],
                       percent_change_24h=body['percent_change_24h'],percent_change_7d=body['percent_change_7d'],last_updated=body['last_updated'])
@@ -100,7 +104,7 @@ class User.Watchlist(APIView):
         watchlistItem.name = body['name']
         watchlistItem.rank = body['rank']
         watchlistItem.price_usd = body['price_usd']
-        watchlistItem.24h_volume_usd = body['24h_volume_usd']
+        watchlistItem.volume_24h_usd = body['volume_24h_usd']
         watchlistItem.market_cap_usd = body['market_cap_usd']
         watchlistItem.available_supply = body['available_supply']
         watchlistItem.total_supply = body['total_supply']
@@ -139,7 +143,7 @@ class Currencies(APIView):
         body = json.loads(body_unicode)
         
         newCurrency = Currency(currency_id=body['currency_id'],name=body['name'],symbol=body['symbol'],
-                      rank=body['rank'],price_usd=body['price_usd'],24h_volume_usd=body['24h_volume_usd'],
+                      rank=body['rank'],price_usd=body['price_usd'],volume_24h_usd=body['volume_24h_usd'],
                       market_cap_usd=body['market_cap_usd'],available_supply=body['available_supply'],
                       total_supply=body['total_supply'],percent_change_1h=body['percent_change_1h'],
                       percent_change_24h=body['percent_change_24h'],percent_change_7d=body['percent_change_7d'],last_updated=body['last_updated'])
@@ -161,7 +165,7 @@ class Currencies(APIView):
         singleCurrency.name = body['name']
         singleCurrency.rank = body['rank']
         singleCurrency.price_usd = body['price_usd']
-        singleCurrency.24h_volume_usd = body['24h_volume_usd']
+        singleCurrency.volume_24h_usd = body['volume_24h_usd']
         singleCurrency.market_cap_usd = body['market_cap_usd']
         singleCurrency.available_supply = body['available_supply']
         singleCurrency.total_supply = body['total_supply']

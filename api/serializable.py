@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Currency
 from .models import User
+from .models import UserWatchlist
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,13 +12,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserWatchlistSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User.Watchlist
-        fields = ('currency_id','name','symbol','rank','price_usd','24h_volume_usd','market_cap_usd','available_supply','total_supply','percent_change_1h','percent_change_24h','percent_change_7d','last_updated')
+        model = UserWatchlist
+        fields = ('currency_id','name','symbol','rank','price_usd','volume_24h_usd','market_cap_usd','available_supply','total_supply','percent_change_1h','percent_change_24h','percent_change_7d','last_updated')
 
 
 class CurrencySerializer(serializers.ModelSerializer):
     class Meta:
         model = Currency
-        fields = ('currency_id','name','symbol','rank','price_usd','24h_volume_usd','market_cap_usd','available_supply','total_supply','percent_change_1h','percent_change_24h','percent_change_7d','last_updated')
+        fields = ('currency_id','name','symbol','rank','price_usd','volume_24h_usd','market_cap_usd','available_supply','total_supply','percent_change_1h','percent_change_24h','percent_change_7d','last_updated')
 
     

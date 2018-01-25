@@ -11,13 +11,13 @@ class User(models.Model):
     status = models.CharField(max_length=20)
 
 
-class User.Watchlist(models.Model):
+class UserWatchlist(models.Model):
     currency_id = models.CharField(max_length=20)
     name = models.CharField(max_length=20)
     symbol = models.CharField(max_length=7)
     rank = models.CharField(max_length=5)
     price_usd = models.CharField(max_length=20)
-    24h_volume_usd = models.CharField(max_length=20)
+    volume_24h_usd = models.CharField(max_length=20)
     market_cap_usd = models.CharField(max_length=20)
     available_supply = models.CharField(max_length=20)
     total_supply = models.CharField(max_length=20)
@@ -33,7 +33,7 @@ class Currency(models.Model):
     symbol = models.CharField(max_length=7)
     rank = models.CharField(max_length=5)
     price_usd = models.CharField(max_length=20)
-    24h_volume_usd = models.CharField(max_length=20)
+    volume_24h_usd = models.CharField(max_length=20)
     market_cap_usd = models.CharField(max_length=20)
     available_supply = models.CharField(max_length=20)
     total_supply = models.CharField(max_length=20)
