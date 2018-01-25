@@ -148,7 +148,7 @@ class CurrenciesView(APIView):
         serializer = CurrencySerializer(newCurrency, many=False)
         return Response(serializer.data)
         
-    def post(self, request, game_id):
+    def post(self, request, currency_id):
         
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
