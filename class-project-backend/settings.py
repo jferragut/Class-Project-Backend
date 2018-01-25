@@ -26,7 +26,7 @@ SECRET_KEY = 'ognh-f)nl&lzbm-_g9znq-f5mp-r+fxdt&%#nrh5_%x#q4ad38'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'sample-python-api-alesanchezr.c9users.io'
+    'class-project-backend-jonnywrites.c9users.io'
     ]
 
 
