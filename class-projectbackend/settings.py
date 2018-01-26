@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'c9.io/innecco9/class-project-backend'
+    'class-project-backend-jonnywrites.c9users.io'
     ]
 
 
@@ -53,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'tictactoe.urls'
+ROOT_URLCONF = 'class-project-backend.urls'
 
 TEMPLATES = [
     {
@@ -71,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tictactoe.wsgi.application'
+WSGI_APPLICATION = 'class-project-backend.wsgi.application'
 
 
 # Database
