@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Currency
-from .models import Alerts
+from .models import Alert
 from .models import UserWatchlist
 from django.contrib.auth.models import User
 
