@@ -2,15 +2,6 @@ from django.db import models
 
 # Create your models here.
 
-class User(models.Model):
-    user_id = models.CharField(max_length=15)
-    firstname = models.CharField(max_length=15)
-    lastname = models.CharField(max_length=15)
-    email = models.CharField(max_length=50)
-    password = models.CharField(max_length=20)
-    email_contact = models.CharField(max_length=5)
-    status = models.CharField(max_length=20)
-
 
 class UserWatchlist(models.Model):
     currency_id = models.CharField(max_length=20)

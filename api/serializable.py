@@ -7,7 +7,7 @@ from .models import UserWatchlist
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('firstname','lastname','email','password','email_contact','status')
+        fields = ('first_name','last_name','email','password','email_contact','status')
 
 
 class UserWatchlistSerializer(serializers.ModelSerializer):

@@ -41,7 +41,7 @@ class UserView(APIView):
         
         # Look for the user in the database and update the properties 
         # based on what came from the request
-        theUser = Game.objects.get(pk=game_id)
+        theUser = User.objects.get(pk=user_id)
         theUser.firstname = body['firstname']
         theUser.lastname = body['lastname']
         theUser.email = body['email']
@@ -123,8 +123,8 @@ class UserWatchlistView(APIView):
         
         
         
-class CurrenciesView(APIView):
-    def get(self, request, game_id):
+class CurrencyView(APIView):
+    def get(self, request, currency_id):
         
         # look for the currency in the database
         singleCurrency = Currency.objects.get(pk=currency_id)
@@ -181,3 +181,13 @@ class CurrenciesView(APIView):
         singleCurrency.delete()
         
         return Response("ok")
+        
+        
+class CurrenciesView(APIView):
+    def get(self, request):
+        
+        # look for the currency in the database
+        listCurrencies = Currency.objects.get()
+        
+        serializer = CurrencySerializer(listCurrencies, many=False)
+        return Response(serializer.data)
