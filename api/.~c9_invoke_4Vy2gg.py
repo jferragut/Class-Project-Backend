@@ -192,8 +192,3 @@ class CurrenciesView(APIView):
         
         serializer = CurrencySerializer(listCurrencies, many=False)
         return Response(serializer.data)
-        
-#class AlertView(APIView):
-    #def get(self, request):
-        
-        
