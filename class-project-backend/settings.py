@@ -26,7 +26,7 @@ SECRET_KEY = 'ognh-f)nl&lzbm-_g9znq-f5mp-r+fxdt&%#nrh5_%x#q4ad38'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'c9.io/innecco9/class-project-backend'
+    'c9.io/innecco9/class-project-backend',
     'class-project-backend-jonnywrites.c9users.io'
     ]
 
