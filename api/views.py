@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from django.http import HttpResponse
 
 #import models and serializer
-from .models import Currency, Alert, UserWatchlist
+
+from .models import Currency, Alert, UserWatchlist,ExtendUser
 from django.contrib.auth.models import User
 from .serializable import CurrencySerializer, UserWatchlistSerializer, UserSerializer
 
@@ -26,9 +27,9 @@ class UserView(APIView):
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
-        
-        newUser = User(firstname=body['firstname'],lastname=body['lastname'],email=body['email'],password=body['password'],
-                  email_contact=body['email_contact'],status=body['status'])
+        newUser = User(first_name=body['first_name'],last_name=body['last_name'],email=body['email'],password=body['password'],
+                  is_active=body['is_active'],last_login=body['last_login'],date_joined=body['date_joined'],email_contact=body['email_contact'],
+                  subscription_status=body['subscription_status'])
         newUser.save()
         
         serializer = UserSerializer(newUser, many=False)
@@ -47,8 +48,11 @@ class UserView(APIView):
         theUser.lastname = body['lastname']
         theUser.email = body['email']
         theUser.password = body['password']
+        theUser.is_active = body['is_active']
+        theUser.last_login = body['last_login']
+        theUser.date_joined = body['date_joined']
         theUser.email_contact = body['email_contact']
-        theUser.status = body['status']
+        theUser.subscription_status = body['subscription_status']
         theUser.save()
         
         # serialize the response object and pass it back
