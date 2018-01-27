@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.http import HttpResponse
 
 #import models and serializer
-from .models import Currency, Alerts, UserWatchlist
+from .models import Currency, Alert, UserWatchlist
 from django.contrib.auth.models import User
 from .serializable import CurrencySerializer, UserWatchlistSerializer, UserSerializer
 
@@ -193,7 +193,15 @@ class CurrenciesView(APIView):
         serializer = CurrencySerializer(listCurrencies, many=False)
         return Response(serializer.data)
         
-#class AlertView(APIView):
-    #def get(self, request):
+class AlertsView(APIView):
+    def get(self, request, user_id):
+        
+        # look for the currency in the database
+        listAlerts = Alert.objects.get()
+        
+        serializer = AlertSerializer(listAlerts, many=False)
+        return Response(serializer.data)
+        
+
         
         
