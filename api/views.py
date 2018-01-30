@@ -130,9 +130,11 @@ class UserWatchlistView(APIView):
         
 class CurrencyView(APIView):
     def get(self, request, currency_id):
-        
-        # look for the currency in the database
-        singleCurrency = Currency.objects.get(pk=currency_id)
+        try:
+            # look for the currency in the database
+            singleCurrency = Currency.objects.get(pk=currency_id)
+        except Currency.DoesNotExist:
+            return Response([])
         
         serializer = CurrencySerializer(singleCurrency, many=False)
         return Response(serializer.data)
@@ -191,8 +193,12 @@ class CurrencyView(APIView):
 class CurrenciesView(APIView):
     def get(self, request):
         
-        # look for the currency in the database
-        listCurrencies = Currency.objects.get()
+        try:
+            # look for the currency in the database
+            listCurrencies = Currency.objects.get()
+            
+        except Currency.DoesNotExist:
+            return Response([])    
         
         serializer = CurrencySerializer(listCurrencies, many=False)
         return Response(serializer.data)
