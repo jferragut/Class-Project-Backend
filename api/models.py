@@ -3,10 +3,9 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-# Create your models here.
 
 
-#ExtendUser will extend the user model
+# ExtendUser will extend the user model
 class ExtendUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,null=True)
     email_contact = models.BooleanField(default=True)
@@ -38,9 +37,9 @@ class UserWatchlist(models.Model):
     percent_change_7d = models.CharField(max_length=20)
     last_updated = models.CharField(max_length=20)
     
+    
 
 class Currency(models.Model):
-    currency_id = models.CharField(max_length=20)
     name = models.CharField(max_length=20)
     symbol = models.CharField(max_length=7)
     rank = models.CharField(max_length=5)
@@ -53,10 +52,11 @@ class Currency(models.Model):
     percent_change_24h = models.CharField(max_length=20)
     percent_change_7d = models.CharField(max_length=20)
     last_updated = models.CharField(max_length=20)
+    ticker_history = models.CharField(max_length=44,default='')
 
 
 class Alert(models.Model):
-    currency_id = models.CharField(max_length=15)
+    currency = models.ForeignKey('Currency', on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=15)
     symbol = models.CharField(max_length=7)
     price_usd = models.FloatField

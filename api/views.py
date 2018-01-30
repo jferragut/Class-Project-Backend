@@ -8,7 +8,7 @@ from django.http import HttpResponse
 
 from .models import Currency, Alert, UserWatchlist,ExtendUser
 from django.contrib.auth.models import User
-from .serializable import CurrencySerializer, UserWatchlistSerializer, UserSerializer
+from .serializable import CurrencySerializer, UserWatchlistSerializer, UserSerializer, AlertSerializer
 
 
          
@@ -82,7 +82,7 @@ class UserWatchlistView(APIView):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-        newWatchlistItem = User.Watchlist(currency_id=body['currency_id'],name=body['name'],symbol=body['symbol'],
+        newWatchlistItem = UserWatchlist(currency_id=body['currency_id'],name=body['name'],symbol=body['symbol'],
                       rank=body['rank'],price_usd=body['price_usd'],volume_24h_usd=body['volume_24h_usd'],
                       market_cap_usd=body['market_cap_usd'],available_supply=body['available_supply'],
                       total_supply=body['total_supply'],percent_change_1h=body['percent_change_1h'],
@@ -92,7 +92,7 @@ class UserWatchlistView(APIView):
         serializer = UserWatchlistSerializer(newWatchlistItem, many=False)
         return Response(serializer.data)
         
-    def post(self, request, user_id):
+    def post(self, request, currency_id):
         
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
@@ -100,7 +100,7 @@ class UserWatchlistView(APIView):
         
         # Look for the user in the database and update the properties 
         # based on what came from the request
-        watchlistItem = User.Watchlist.objects.get(pk=currency_id)
+        watchlistItem = UserWatchlist.objects.get(pk=currency_id)
         watchlistItem.currency_id = body['currency_id']
         watchlistItem.name = body['name']
         watchlistItem.rank = body['rank']
@@ -121,7 +121,7 @@ class UserWatchlistView(APIView):
         
     def delete(self, request, currency_id):
         
-        watchlistItem = User.Watchlist.objects.get(pk=currency_id)
+        watchlistItem = UserWatchlist.objects.get(pk=currency_id)
         watchlistItem.delete()
         
         return Response("ok")
@@ -149,7 +149,8 @@ class CurrencyView(APIView):
                       rank=body['rank'],price_usd=body['price_usd'],volume_24h_usd=body['volume_24h_usd'],
                       market_cap_usd=body['market_cap_usd'],available_supply=body['available_supply'],
                       total_supply=body['total_supply'],percent_change_1h=body['percent_change_1h'],
-                      percent_change_24h=body['percent_change_24h'],percent_change_7d=body['percent_change_7d'],last_updated=body['last_updated'])
+                      percent_change_24h=body['percent_change_24h'],percent_change_7d=body['percent_change_7d'],last_updated=body['last_updated'],
+                      ticker_history=body['ticker_history'])
         newCurrency.save()
         
         serializer = CurrencySerializer(newCurrency, many=False)
@@ -192,15 +193,14 @@ class CurrencyView(APIView):
         
 class CurrenciesView(APIView):
     def get(self, request):
-        
         try:
             # look for the currency in the database
-            listCurrencies = Currency.objects.get()
+            listCurrencies = Currency.objects.all()
             
         except Currency.DoesNotExist:
             return Response([])    
         
-        serializer = CurrencySerializer(listCurrencies, many=False)
+        serializer = CurrencySerializer(listCurrencies, many=True)
         return Response(serializer.data)
         
 class AlertsView(APIView):
@@ -211,7 +211,3 @@ class AlertsView(APIView):
         
         serializer = AlertSerializer(listAlerts, many=False)
         return Response(serializer.data)
-        
-
-        
-        
