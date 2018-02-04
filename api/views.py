@@ -21,10 +21,12 @@ class UserView(APIView):
     # Get method that will return a given user's information
     def get(self, request, user_name):
         
-        # look for the User in the database
-        theUser = User.objects.get(username=user_name)
-        
-        # Custom Error Handling
+        try:
+            # look for the User in the database
+            theUser = User.objects.get(username=user_name)
+            
+            # Custom Error Handling
+            
         except User.DoesNotExist:
             # Custom error message to return if user is not found
             raise ObjectNotFound("Could not find the user, "+str(user_name)+".")
@@ -85,10 +87,12 @@ class UserView(APIView):
         
     def delete(self, request, user_name):
         
-        # Find the user and get their record
-        theUser = User.objects.get(username=user_name)
-
-        # Custom Error Handling
+        try:
+            # Find the user and get their record
+            theUser = User.objects.get(username=user_name)
+    
+            # Custom Error Handling
+            
         except User.DoesNotExist:
             # Custom error message to return if user is not found
             raise ObjectNotFound("Could not find the user, "+str(user_name)+".")
@@ -257,9 +261,8 @@ class CurrencyView(APIView):
     def delete(self, request, coin_symbol):
         
         try:
-            
-        # Find the currency in the database
-        singleCurrency = Currency.objects.get(symbol=coin_symbol)
+            # Find the currency in the database
+            singleCurrency = Currency.objects.get(symbol=coin_symbol)
         
         except Currency.DoesNotExist:
             # Custom error message to return if coin is not found
@@ -283,7 +286,7 @@ class CurrenciesView(APIView):
             
         except Currency.DoesNotExist:
             # Custom error message to return if coin is not found
-            raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
+            raise ObjectNotFound("No currencies exist.")
         
         # Serialize the response
         serializer = CurrencySerializer(listCurrencies, many=True)
@@ -298,10 +301,28 @@ class CurrenciesView(APIView):
 #------------------------------------------------
 
 class AlertsView(APIView):
-    def get(self, request, user_id):
+    
+    # Get method that returns all coins that the user is being alerted for
+    def get(self, request, user_name):
         
-        # look for the currency in the database
-        listAlerts = Alert.objects.get()
+        try:
+            # look for the User in the database
+            theUser = User.objects.get(username=user_name)
+            
+            # Look for the currency in the database
+            getAlerts = theUser.Alert.all()
         
-        serializer = AlertSerializer(listAlerts, many=False)
+        # Custom Error Handling
+        except User.DoesNotExist:
+            # Custom error message to return if user is not found
+            raise ObjectNotFound("Could not find the user, "+str(user_name)+".")  
+            
+        except Alert.DoesNotExist:
+            # Custom error message to return if alert is not found
+            raise ObjectNotFound("User "+str(user_name)+" does not presently have any alerts.")        
+        
+        # Serialize the response
+        serializer = AlertSerializer(getAlerts, many=True)
+        
+        # Return the list of alerts
         return Response(serializer.data)

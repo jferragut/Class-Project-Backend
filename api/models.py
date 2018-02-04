@@ -58,6 +58,9 @@ def save_user_extenduser(sender, instance, **kwargs):
 
 
 class Alert(models.Model):
+    # Establish a 1 to 1 with User
+    user = models.OneToOneField(User, on_delete=models.CASCADE,null=True)
+    
     # Establish a 1 to N relationship with the Currency table
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True)
     
