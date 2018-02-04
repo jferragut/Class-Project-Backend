@@ -38,7 +38,8 @@ class ExtendUser(models.Model):
     
     # The watchlist field isn't an actual field but rather a N to N with 
     # the Currency table
-    watchlist = models.ManyToManyField(Currency,default="")
+    watchlist = models.ManyToManyField(Currency,default="",related_name='%(class)s_watchlist')
+    alerts = models.ManyToManyField(Currency,default="",related_name='%(class)s_alerts')
     
     # Redefine the string response to be more explicit
     def __str__(self):
@@ -55,20 +56,4 @@ def create_user_extenduser(sender, instance, created, **kwargs):
 def save_user_extenduser(sender, instance, **kwargs):
     instance.extenduser.save()
 
-
-
-class Alert(models.Model):
-    # Establish a 1 to 1 with User
-    user = models.OneToOneField(User, on_delete=models.CASCADE,null=True)
-    
-    # Establish a 1 to N relationship with the Currency table
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True)
-    
-    # Define the fields
-    name = models.CharField(max_length=15)
-    symbol = models.CharField(max_length=7)
-    price_usd = models.FloatField
-    percent_change_1h = models.FloatField
-    percent_change_24h = models.FloatField
-    alert = models.BooleanField(default=False)
 

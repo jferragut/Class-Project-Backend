@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Currency,Alert,ExtendUser
+from .models import Currency,ExtendUser
 from django.contrib.auth.models import User
 
 
@@ -14,9 +14,5 @@ class CurrencySerializer(serializers.ModelSerializer):
         fields = ('name','symbol','rank','price_usd','volume_24h_usd','market_cap_usd','available_supply','total_supply','percent_change_1h','percent_change_24h','percent_change_7d','last_updated','ticker_history')
 
     
-class AlertSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Alert
-        fields = ('currency','name','symbol','price_usd','percent_change_24h','percent_change_7d','alert')
 
     

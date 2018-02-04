@@ -6,9 +6,9 @@ from django.http import HttpResponse
 from .utils import ObjectNotFound
 
 #import models and serializer
-from .models import Currency, Alert, ExtendUser
+from .models import Currency, ExtendUser
 from django.contrib.auth.models import User
-from .serializable import CurrencySerializer, UserSerializer, AlertSerializer
+from .serializable import CurrencySerializer, UserSerializer
 
 
          
@@ -309,20 +309,75 @@ class AlertsView(APIView):
             # look for the User in the database
             theUser = User.objects.get(username=user_name)
             
-            # Look for the currency in the database
-            getAlerts = theUser.Alert.all()
+            # Look for the alert in the database
+            getAlerts = theUser.extenduser.alerts.all()
         
         # Custom Error Handling
         except User.DoesNotExist:
             # Custom error message to return if user is not found
             raise ObjectNotFound("Could not find the user, "+str(user_name)+".")  
-            
-        except Alert.DoesNotExist:
-            # Custom error message to return if alert is not found
-            raise ObjectNotFound("User "+str(user_name)+" does not presently have any alerts.")        
+              
         
         # Serialize the response
-        serializer = AlertSerializer(getAlerts, many=True)
+        serializer = CurrencySerializer(getAlerts, many=True)
         
         # Return the list of alerts
         return Response(serializer.data)
+        
+class UpdateAlertsView(APIView):
+    
+    # Put method that will add a currency to a user's watchlist
+    def put(self, request, user_name, coin_symbol):
+        
+        try:
+            # Get the user's watchlist
+            theUser = User.objects.get(username=user_name)
+            
+            # Get the coin specified in the query
+            theCoin = Currency.objects.get(symbol=coin_symbol)
+            
+            # Add the coin to the user's alerts
+            theUser.extenduser.alerts.add(theCoin)
+            
+            
+        #Custom Error Handling
+        except User.DoesNotExist:
+            # Custom error message to return if user is not found
+            raise ObjectNotFound("Could not find the user, "+str(user_name)+".")
+            
+        except Currency.DoesNotExist:
+            # Custom error message to return if coin is not found
+            raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
+            
+        
+        # Serialize the currency data    
+        serializer = CurrencySerializer(theCoin, many=False)
+        
+        # Return the object
+        return Response(serializer.data)
+    
+    
+    # Delete method to remove an alert from a user    
+    def delete(self, request, user_name, coin_symbol):
+        
+        try:
+            # get watchlist for given user        
+            theUser = User.objects.get(username=user_name)
+            
+            # get the coin specified in the query
+            theCoin = Currency.objects.get(symbol=coin_symbol)
+        
+        #Custom Error Handling
+        except User.DoesNotExist:
+            # Custom error message to return if user is not found
+            raise ObjectNotFound("Could not find the user, "+str(user_name)+".")
+            
+        except Currency.DoesNotExist:
+            # Custom error message to return if coin is not found
+            raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
+        
+        # Remove the coin from watchlist
+        theUser.extenduser.alerts.remove(theCoin)
+        
+        # Send response
+        return Response("Removed currency,"+coin_symbol+" from alerts.")
