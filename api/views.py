@@ -178,7 +178,8 @@ class UserWatchlistView(APIView):
         # Remove the coin from watchlist
         theUser.extenduser.watchlist.remove(theCoin)
         
-        return Response("ok")
+        # Send response
+        return Response("Removed currency,"+coin_symbol+" from watchlist.")
         
         
 #------------------------------------------------
@@ -367,6 +368,10 @@ class UpdateAlertsView(APIView):
             # get the coin specified in the query
             theCoin = Currency.objects.get(symbol=coin_symbol)
         
+            # Remove the coin from watchlist
+            theUser.extenduser.alerts.remove(theCoin)
+            
+            
         #Custom Error Handling
         except User.DoesNotExist:
             # Custom error message to return if user is not found
@@ -376,8 +381,6 @@ class UpdateAlertsView(APIView):
             # Custom error message to return if coin is not found
             raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
         
-        # Remove the coin from watchlist
-        theUser.extenduser.alerts.remove(theCoin)
         
         # Send response
         return Response("Removed currency,"+coin_symbol+" from alerts.")
