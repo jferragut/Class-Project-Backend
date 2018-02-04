@@ -3,21 +3,21 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse
+from .utils import ObjectNotFound
 
 #import models and serializer
-
-from .models import Currency, Alert, UserWatchlist,ExtendUser
+from .models import Currency, Alert, ExtendUser
 from django.contrib.auth.models import User
-from .serializable import CurrencySerializer, UserWatchlistSerializer, UserSerializer, AlertSerializer
+from .serializable import CurrencySerializer, UserSerializer, AlertSerializer
 
 
          
         
 class UserView(APIView):
-    def get(self, request, user_id):
+    def get(self, request, user_name):
         
         # look for the User in the database
-        theUser = User.objects.get(pk=user_id)
+        theUser = User.objects.get(username=user_name)
         
         serializer = UserSerializer(theUser, many=False)
         return Response(serializer.data)
@@ -28,14 +28,14 @@ class UserView(APIView):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         newUser = User(first_name=body['first_name'],last_name=body['last_name'],email=body['email'],password=body['password'],
-                  is_active=body['is_active'],last_login=body['last_login'],date_joined=body['date_joined'],email_contact=body['email_contact'],
+                  is_active=body['is_active'],last_login=body['last_login'],date_joined=body['date_joined'],
                   subscription_status=body['subscription_status'])
         newUser.save()
         
         serializer = UserSerializer(newUser, many=False)
         return Response(serializer.data)
         
-    def post(self, request, user_id):
+    def post(self, request, username):
         
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
@@ -43,7 +43,7 @@ class UserView(APIView):
         
         # Look for the user in the database and update the properties 
         # based on what came from the request
-        theUser = User.objects.get(pk=user_id)
+        theUser = User.objects.get(username=username)
         theUser.firstname = body['firstname']
         theUser.lastname = body['lastname']
         theUser.email = body['email']
@@ -51,8 +51,8 @@ class UserView(APIView):
         theUser.is_active = body['is_active']
         theUser.last_login = body['last_login']
         theUser.date_joined = body['date_joined']
-        theUser.email_contact = body['email_contact']
-        theUser.subscription_status = body['subscription_status']
+        theUser.extenduser.email_contact = body['email_contact']
+        theUser.extenduser.subscription_status = body['subscription_status']
         theUser.save()
         
         # serialize the response object and pass it back
@@ -66,65 +66,65 @@ class UserView(APIView):
         
         return Response("ok")
         
+class UserWatchlistDetailView(APIView):
+    def get(self, request, user_name):
+        
+        
+        # look for the User in the database
+        theUser = User.objects.get(username=user_name)
+        
+        theWatchlist = theUser.extenduser.watchlist.all()
+        
+        serializer = CurrencySerializer(theWatchlist, many=True)
+        return Response(serializer.data)        
         
 class UserWatchlistView(APIView):
-    def get(self, request, currency_id):
         
-        # look for the Watchlist Items in the database
-        watchlistItem = UserWatchlist.objects.get(pk=currency_id)
+    def put(self, request, user_name, coin_symbol):
         
-        serializer = UserWatchlistSerializer(watchlistItem, many=False)
+        try:
+            # get the user's watchlist
+            theUser = User.objects.get(username=user_name)
+            
+            # get the coin specified in the query
+            theCoin = Currency.objects.get(symbol=coin_symbol)
+            
+            # add the coin to the watchlist
+            theUser.extenduser.watchlist.add(theCoin)
+            
+        except User.DoesNotExist:
+            
+            raise ObjectNotFound("Could not find the user, "+str(user_name))
+            
+        except Currency.DoesNotExist:
+            
+        #     theUser.extenduser.watchlist = theCoin
+        #     theUser.extenduser.watchlist.save()
+            
+        
+        
+        serializer = CurrencySerializer(theCoin, many=False)
         return Response(serializer.data)
         
-    def put(self, request):
+    # def delete(self, request, user_name, coin_symbol):
         
-        # I get the content from the body request and convert it into a dictionary
-        body_unicode = request.body.decode('utf-8')
-        body = json.loads(body_unicode)
+    #     try:
+    #         # get watchlist for given user        
+    #         theUser = User.objects.get(id=user_id)
+            
+    #         # get the coin specified in the query
+    #         theCoin = Currency.objects.get(symbol=coin_symbol)
         
-        newWatchlistItem = UserWatchlist(currency_id=body['currency_id'],name=body['name'],symbol=body['symbol'],
-                      rank=body['rank'],price_usd=body['price_usd'],volume_24h_usd=body['volume_24h_usd'],
-                      market_cap_usd=body['market_cap_usd'],available_supply=body['available_supply'],
-                      total_supply=body['total_supply'],percent_change_1h=body['percent_change_1h'],
-                      percent_change_24h=body['percent_change_24h'],percent_change_7d=body['percent_change_7d'],last_updated=body['last_updated'])
-        newWatchlistItem.save()
+    #     except theUser.DoesNotExist:
+    #         raise ObjectNotFound('Wululu')
+            
+    #     except theCoin.DoesNotExist:
+    #         return Response()
         
-        serializer = UserWatchlistSerializer(newWatchlistItem, many=False)
-        return Response(serializer.data)
+    #     # remove the coin from watchlist
+    #     theUser.watchlist.remove(theCoin)
         
-    def post(self, request, currency_id):
-        
-        # I get the content from the body request and convert it into a dictionary
-        body_unicode = request.body.decode('utf-8')
-        body = json.loads(body_unicode)
-        
-        # Look for the user in the database and update the properties 
-        # based on what came from the request
-        watchlistItem = UserWatchlist.objects.get(pk=currency_id)
-        watchlistItem.currency_id = body['currency_id']
-        watchlistItem.name = body['name']
-        watchlistItem.rank = body['rank']
-        watchlistItem.price_usd = body['price_usd']
-        watchlistItem.volume_24h_usd = body['volume_24h_usd']
-        watchlistItem.market_cap_usd = body['market_cap_usd']
-        watchlistItem.available_supply = body['available_supply']
-        watchlistItem.total_supply = body['total_supply']
-        watchlistItem.percent_change_1h = body['percent_change_1h']
-        watchlistItem.percent_change_24h = body['percent_change_24h']
-        watchlistItem.percent_change_7d = body['percent_change_7d']
-        watchlistItem.last_updated = body['last_updated']
-        watchlistItem.save()
-        
-        # serialize the response object and pass it back
-        serializer = UserWatchlistSerializer(watchlistItem, many=False)
-        return Response(serializer.data)
-        
-    def delete(self, request, currency_id):
-        
-        watchlistItem = UserWatchlist.objects.get(pk=currency_id)
-        watchlistItem.delete()
-        
-        return Response("ok")
+    #     return Response("ok")
         
         
         
