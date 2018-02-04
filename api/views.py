@@ -12,29 +12,53 @@ from .serializable import CurrencySerializer, UserSerializer, AlertSerializer
 
 
          
+#------------------------------------------------
+#Begin Views for User        
+#------------------------------------------------
         
 class UserView(APIView):
+    
+    # Get method that will return a given user's information
     def get(self, request, user_name):
         
         # look for the User in the database
         theUser = User.objects.get(username=user_name)
         
+        # Custom Error Handling
+        except User.DoesNotExist:
+            # Custom error message to return if user is not found
+            raise ObjectNotFound("Could not find the user, "+str(user_name)+".")
+
+        # Serialize the response object and pass it back
         serializer = UserSerializer(theUser, many=False)
+        
+        # Return the user object
         return Response(serializer.data)
         
+        
+    # Put method that will add a new user into the database
     def put(self, request):
         
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
-        newUser = User(first_name=body['first_name'],last_name=body['last_name'],email=body['email'],password=body['password'],
-                  is_active=body['is_active'],last_login=body['last_login'],date_joined=body['date_joined'],
-                  subscription_status=body['subscription_status'])
+        
+        # Define what the prototype is for a user and grab data from the dictionary
+        newUser = User(username=body['username'],first_name=body['first_name'],last_name=body['last_name'],email=body['email'],
+                  password=body['password'],is_active=body['is_active'],last_login=body['last_login'],date_joined=body['date_joined'],
+                  email_contact=body['email_contact'],subscription_status=body['subscription_status'])
+        
+        # Save the new user
         newUser.save()
         
+        # Serialize the response object and pass it back
         serializer = UserSerializer(newUser, many=False)
-        return Response(serializer.data)
         
+        # Return the new user object
+        return Response(serializer.data)
+    
+    
+    # Post method for updating a user record in the database
     def post(self, request, username):
         
         # I get the content from the body request and convert it into a dictionary
@@ -44,119 +68,163 @@ class UserView(APIView):
         # Look for the user in the database and update the properties 
         # based on what came from the request
         theUser = User.objects.get(username=username)
+        theUser.username = body['username']
         theUser.firstname = body['firstname']
         theUser.lastname = body['lastname']
         theUser.email = body['email']
         theUser.password = body['password']
         theUser.is_active = body['is_active']
         theUser.last_login = body['last_login']
-        theUser.date_joined = body['date_joined']
         theUser.extenduser.email_contact = body['email_contact']
         theUser.extenduser.subscription_status = body['subscription_status']
         theUser.save()
         
-        # serialize the response object and pass it back
+        # Serialize the response object and pass it back
         serializer = UserSerializer(theUser, many=False)
         return Response(serializer.data)
         
-    def delete(self, request, user_id):
+    def delete(self, request, user_name):
         
-        theUser = User.objects.get(pk=user_id)
+        # Find the user and get their record
+        theUser = User.objects.get(username=user_name)
+
+        # Custom Error Handling
+        except User.DoesNotExist:
+            # Custom error message to return if user is not found
+            raise ObjectNotFound("Could not find the user, "+str(user_name)+".")
+        
+        # Delete the user record
         theUser.delete()
         
-        return Response("ok")
-        
+        # Return a response
+        return Response("Removed user,"+user_name+".")
+      
+      
+#------------------------------------------------
+#Begin Views for User Watchlist        
+#------------------------------------------------
+
 class UserWatchlistDetailView(APIView):
+    
+    # Get method that will return a specific user's watchlist
     def get(self, request, user_name):
         
-        
-        # look for the User in the database
+        # Look for the User in the database
         theUser = User.objects.get(username=user_name)
         
+        # Grab the user's watchlist
         theWatchlist = theUser.extenduser.watchlist.all()
         
+        # Serialize the data using the currency serializer because it's an array
+        # of currency objects
         serializer = CurrencySerializer(theWatchlist, many=True)
+        
+        # Return the array of objects
         return Response(serializer.data)        
         
-class UserWatchlistView(APIView):
         
+class UserWatchlistView(APIView):
+    
+    # Put method that will add a currency to a user's watchlist
     def put(self, request, user_name, coin_symbol):
         
         try:
-            # get the user's watchlist
+            # Get the user's watchlist
+            theUser = User.objects.get(username=user_name)
+            
+            # Get the coin specified in the query
+            theCoin = Currency.objects.get(symbol=coin_symbol)
+            
+            # Add the coin to the watchlist
+            theUser.extenduser.watchlist.add(theCoin)
+            
+        #Custom Error Handling
+        except User.DoesNotExist:
+            # Custom error message to return if user is not found
+            raise ObjectNotFound("Could not find the user, "+str(user_name)+".")
+            
+        except Currency.DoesNotExist:
+            # Custom error message to return if coin is not found
+            raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
+        
+        # Serialize the currency data    
+        serializer = CurrencySerializer(theCoin, many=False)
+        
+        # Return the object
+        return Response(serializer.data)
+        
+    def delete(self, request, user_name, coin_symbol):
+        
+        try:
+            # get watchlist for given user        
             theUser = User.objects.get(username=user_name)
             
             # get the coin specified in the query
             theCoin = Currency.objects.get(symbol=coin_symbol)
-            
-            # add the coin to the watchlist
-            theUser.extenduser.watchlist.add(theCoin)
-            
+        
+        #Custom Error Handling
         except User.DoesNotExist:
-            
-            raise ObjectNotFound("Could not find the user, "+str(user_name))
+            # Custom error message to return if user is not found
+            raise ObjectNotFound("Could not find the user, "+str(user_name)+".")
             
         except Currency.DoesNotExist:
-            
-        #     theUser.extenduser.watchlist = theCoin
-        #     theUser.extenduser.watchlist.save()
-            
+            # Custom error message to return if coin is not found
+            raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
+        
+        # Remove the coin from watchlist
+        theUser.extenduser.watchlist.remove(theCoin)
+        
+        return Response("ok")
         
         
-        serializer = CurrencySerializer(theCoin, many=False)
-        return Response(serializer.data)
-        
-    # def delete(self, request, user_name, coin_symbol):
-        
-    #     try:
-    #         # get watchlist for given user        
-    #         theUser = User.objects.get(id=user_id)
-            
-    #         # get the coin specified in the query
-    #         theCoin = Currency.objects.get(symbol=coin_symbol)
-        
-    #     except theUser.DoesNotExist:
-    #         raise ObjectNotFound('Wululu')
-            
-    #     except theCoin.DoesNotExist:
-    #         return Response()
-        
-    #     # remove the coin from watchlist
-    #     theUser.watchlist.remove(theCoin)
-        
-    #     return Response("ok")
-        
-        
-        
+#------------------------------------------------
+# Begin Views for Currency 
+#------------------------------------------------
+
 class CurrencyView(APIView):
-    def get(self, request, currency_id):
+    
+    # Get method that will return a single coin
+    def get(self, request, coin_symbol):
         try:
-            # look for the currency in the database
-            singleCurrency = Currency.objects.get(pk=currency_id)
+            # Look for the coin in the database
+            singleCurrency = Currency.objects.get(symbol=coin_symbol)
+        
         except Currency.DoesNotExist:
-            return Response([])
+            # Custom error message to return if coin is not found
+            raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
         
+        # Serialize the coin
         serializer = CurrencySerializer(singleCurrency, many=False)
-        return Response(serializer.data)
         
+        # Return the coin
+        return Response(serializer.data)
+    
+    # Put method that will create a new coin
     def put(self, request):
         
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
+        # Define what the prototype is for a user and grab data from the dictionary
         newCurrency = Currency(currency_id=body['currency_id'],name=body['name'],symbol=body['symbol'],
                       rank=body['rank'],price_usd=body['price_usd'],volume_24h_usd=body['volume_24h_usd'],
                       market_cap_usd=body['market_cap_usd'],available_supply=body['available_supply'],
                       total_supply=body['total_supply'],percent_change_1h=body['percent_change_1h'],
                       percent_change_24h=body['percent_change_24h'],percent_change_7d=body['percent_change_7d'],last_updated=body['last_updated'],
                       ticker_history=body['ticker_history'])
+        
+        # Save the new coin
         newCurrency.save()
         
+        # Serialize the new coin data
         serializer = CurrencySerializer(newCurrency, many=False)
-        return Response(serializer.data)
         
-    def post(self, request, currency_id):
+        # Return the coin
+        return Response(serializer.data)
+    
+    # Post method that will update a coin that already exists
+    def post(self, request, coin_symbol):
         
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
@@ -164,9 +232,10 @@ class CurrencyView(APIView):
         
         # Look for the game in the database and update the properties 
         # based on what came from the request
-        singleCurrency = Currency.objects.get(pk=currency_id)
+        singleCurrency = Currency.objects.get(symbol=coin_symbol)
         singleCurrency.currency_id = body['currency_id']
         singleCurrency.name = body['name']
+        singleCurrency.symbol = body['symbol']
         singleCurrency.rank = body['rank']
         singleCurrency.price_usd = body['price_usd']
         singleCurrency.volume_24h_usd = body['volume_24h_usd']
@@ -176,33 +245,58 @@ class CurrencyView(APIView):
         singleCurrency.percent_change_1h = body['percent_change_1h']
         singleCurrency.percent_change_24h = body['percent_change_24h']
         singleCurrency.percent_change_7d = body['percent_change_7d']
-        singleCurrency.last_updated = body['last_updated']
+
+        # Save the updates
         singleCurrency.save()
         
         # serialize the response object and pass it back
         serializer = CurrencySerializer(singleCurrency, many=False)
         return Response(serializer.data)
+    
+    # Delete method that will remove a currency from the database
+    def delete(self, request, coin_symbol):
         
-    def delete(self, request, currency_id):
+        try:
+            
+        # Find the currency in the database
+        singleCurrency = Currency.objects.get(symbol=coin_symbol)
         
-        singleCurrency = Currency.objects.get(pk=currency_id)
+        except Currency.DoesNotExist:
+            # Custom error message to return if coin is not found
+            raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
+            
+        # Delete the selected currency    
         singleCurrency.delete()
         
-        return Response("ok")
+        # Send response
+        return Response("Removed currency,"+coin_symbol+".")
         
-        
+
 class CurrenciesView(APIView):
+    
+    # Get method that will return a list of all currencies in the database
     def get(self, request):
+        
         try:
             # look for the currency in the database
             listCurrencies = Currency.objects.all()
             
         except Currency.DoesNotExist:
-            return Response([])    
+            # Custom error message to return if coin is not found
+            raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
         
+        # Serialize the response
         serializer = CurrencySerializer(listCurrencies, many=True)
-        return Response(serializer.data)
         
+        # Return the array of currency objects
+        return Response(serializer.data)
+
+
+        
+#------------------------------------------------
+# Begin Views for Alerts 
+#------------------------------------------------
+
 class AlertsView(APIView):
     def get(self, request, user_id):
         

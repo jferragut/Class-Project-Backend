@@ -8,14 +8,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id','username','first_name','last_name','email','password', 'is_active', 'last_login','date_joined')
 
-class WatchlistSerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer()
-
-    class Meta:
-        model = User
-        fields = "__all__"
-
-
 class CurrencySerializer(serializers.ModelSerializer):
     class Meta:
         model = Currency
