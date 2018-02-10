@@ -44,18 +44,18 @@ class UserView(APIView):
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
-        print(body)
+        
         # Define what the prototype is for a user and grab data from the dictionary
         newUser = User(username=body['username'],first_name=body['first_name'],last_name=body['last_name'],email=body['email'],
         password=body['password'],is_active=body['is_active'],last_login=body['last_login'],date_joined=body['date_joined'])
-        
-        # Save the new user
-        newUser.save()
-        
-        userExtend = ExtendUser(email_contact=body['email_contact'],subscription_status=body['subscription_status'])
-        userExtend.user = newUser
 
-        userExtend.save()
+        try:
+            # Save the new user
+            newUser.save()
+            
+        except Exception as e:
+
+            raise ObjectNotFound("Could not save the User {}".format(e))
 
         # Serialize the response object and pass it back
         serializer = UserSerializer(newUser, many=False)
