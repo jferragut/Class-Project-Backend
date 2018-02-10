@@ -5,6 +5,9 @@ urlpatterns = [
     #Request user information (GET)
     path('user/<str:user_name>', views.UserView.as_view()), 
     
+    #Request user information (GET)
+    path('user/', views.UserView.as_view()), 
+    
     #add coin to Watchlist(PUT) or Delete from Watchlist(DELETE)
     path('user/<str:user_name>/watchlist/<str:coin_symbol>', views.UserWatchlistView.as_view()),
     
