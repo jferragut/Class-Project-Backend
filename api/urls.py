@@ -2,10 +2,10 @@ from django.urls import include, path
 from . import views
 
 urlpatterns = [
-    #Request user information (GET)
+    #Request specific user information (GET), Update a specific user (POST), or Remove a specific user (DELETE)
     path('user/<str:user_name>', views.UserView.as_view()), 
     
-    #Request user information (GET)
+    #Create a new user (PUT)
     path('user/', views.UserView.as_view()), 
     
     #add coin to Watchlist(PUT) or Delete from Watchlist(DELETE)
@@ -20,8 +20,11 @@ urlpatterns = [
     #Request user Alerts (GET)
     path('user/<str:user_name>/alert', views.AlertsView.as_view()),
     
-    #Request an individual currency's information(GET), Add (PUT), update (POST), or delete (DELETE) a currency from the database
-    path('currency/<int:currency_id>', views.CurrencyView.as_view()),
+    #Request an individual currency's information(GET), update (POST), or delete (DELETE) a currency from the database
+    path('currency/<str:symbol>', views.CurrencyView.as_view()),
+    
+    #Add a new currency (PUT)
+    path('currency/', views.CurrencyView.as_view()),
     
     #Request a list of all currencies
     path('currencies/', views.CurrenciesView.as_view()),

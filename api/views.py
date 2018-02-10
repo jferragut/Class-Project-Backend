@@ -65,7 +65,7 @@ class UserView(APIView):
     
     
     # Post method for updating a user record in the database
-    def post(self, request, username):
+    def post(self, request, user_name):
         
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
@@ -73,17 +73,24 @@ class UserView(APIView):
         
         # Look for the user in the database and update the properties 
         # based on what came from the request
-        theUser = User.objects.get(username=username)
+        theUser = User.objects.get(username=user_name)
         theUser.username = body['username']
-        theUser.firstname = body['firstname']
-        theUser.lastname = body['lastname']
+        theUser.first_name = body['first_name']
+        theUser.last_name = body['last_name']
         theUser.email = body['email']
         theUser.password = body['password']
         theUser.is_active = body['is_active']
         theUser.last_login = body['last_login']
         theUser.extenduser.email_contact = body['email_contact']
         theUser.extenduser.subscription_status = body['subscription_status']
-        theUser.save()
+        
+        try:
+            # Save the new user
+            theUser.save()
+        
+        except Exception as e:
+
+            raise ObjectNotFound("Could not save the User {}".format(e))
         
         # Serialize the response object and pass it back
         serializer = UserSerializer(theUser, many=False)
@@ -193,14 +200,14 @@ class UserWatchlistView(APIView):
 class CurrencyView(APIView):
     
     # Get method that will return a single coin
-    def get(self, request, coin_symbol):
+    def get(self, request, symbol):
         try:
             # Look for the coin in the database
-            singleCurrency = Currency.objects.get(symbol=coin_symbol)
+            singleCurrency = Currency.objects.get(symbol=symbol)
         
-        except Currency.DoesNotExist:
-            # Custom error message to return if coin is not found
-            raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
+        except Exception as e:
+            # Custom error message to return if coin could not be updated
+            raise ObjectNotFound("Could not find the currency {}".format(e))
         
         # Serialize the coin
         serializer = CurrencySerializer(singleCurrency, many=False)
@@ -215,16 +222,22 @@ class CurrencyView(APIView):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-        # Define what the prototype is for a user and grab data from the dictionary
-        newCurrency = Currency(currency_id=body['currency_id'],name=body['name'],symbol=body['symbol'],
-                      rank=body['rank'],price_usd=body['price_usd'],volume_24h_usd=body['volume_24h_usd'],
-                      market_cap_usd=body['market_cap_usd'],available_supply=body['available_supply'],
-                      total_supply=body['total_supply'],percent_change_1h=body['percent_change_1h'],
-                      percent_change_24h=body['percent_change_24h'],percent_change_7d=body['percent_change_7d'],last_updated=body['last_updated'],
-                      ticker_history=body['ticker_history'])
+        try:
+            # Define what the prototype is for a user and grab data from the dictionary
+            newCurrency = Currency(name=body['name'],symbol=body['symbol'],
+                          rank=body['rank'],price_usd=body['price_usd'],volume_24h_usd=body['volume_24h_usd'],
+                          market_cap_usd=body['market_cap_usd'],available_supply=body['available_supply'],
+                          total_supply=body['total_supply'],percent_change_1h=body['percent_change_1h'],
+                          percent_change_24h=body['percent_change_24h'],percent_change_7d=body['percent_change_7d'],
+                          last_updated=body['last_updated'],ticker_history=body['ticker_history'])
+            
+            # Save the new coin
+            newCurrency.save()
         
-        # Save the new coin
-        newCurrency.save()
+        except Exception as e:
+            # Custom error message to return if coin could not be created
+            raise ObjectNotFound("Could not create the coin {}".format(e))
+            
         
         # Serialize the new coin data
         serializer = CurrencySerializer(newCurrency, many=False)
@@ -233,51 +246,68 @@ class CurrencyView(APIView):
         return Response(serializer.data)
     
     # Post method that will update a coin that already exists
-    def post(self, request, coin_symbol):
+    def post(self, request, symbol):
         
         # I get the content from the body request and convert it into a dictionary
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-        # Look for the game in the database and update the properties 
-        # based on what came from the request
-        singleCurrency = Currency.objects.get(symbol=coin_symbol)
-        singleCurrency.currency_id = body['currency_id']
-        singleCurrency.name = body['name']
-        singleCurrency.symbol = body['symbol']
-        singleCurrency.rank = body['rank']
-        singleCurrency.price_usd = body['price_usd']
-        singleCurrency.volume_24h_usd = body['volume_24h_usd']
-        singleCurrency.market_cap_usd = body['market_cap_usd']
-        singleCurrency.available_supply = body['available_supply']
-        singleCurrency.total_supply = body['total_supply']
-        singleCurrency.percent_change_1h = body['percent_change_1h']
-        singleCurrency.percent_change_24h = body['percent_change_24h']
-        singleCurrency.percent_change_7d = body['percent_change_7d']
+        try:
+            # Look for the game in the database and update the properties 
+            # based on what came from the request
+            singleCurrency = Currency.objects.get(symbol=symbol)
+            
+        except Currency.DoesNotExist:
+            # Custom error message to return if coin is not found
+            raise ObjectNotFound("Could not find the currency, "+str(symbol)+".")
+            
+        try:    
+            #define and map the prototype
+            singleCurrency.name = body['name']
+            singleCurrency.symbol = body['symbol']
+            singleCurrency.rank = body['rank']
+            singleCurrency.price_usd = body['price_usd']
+            singleCurrency.volume_24h_usd = body['volume_24h_usd']
+            singleCurrency.market_cap_usd = body['market_cap_usd']
+            singleCurrency.available_supply = body['available_supply']
+            singleCurrency.total_supply = body['total_supply']
+            singleCurrency.percent_change_1h = body['percent_change_1h']
+            singleCurrency.percent_change_24h = body['percent_change_24h']
+            singleCurrency.percent_change_7d = body['percent_change_7d']
+            
+            # Save the updates
+            singleCurrency.save()
+            
+        except Exception as e:
+            # Custom error message to return if coin could not be updated
+            raise ObjectNotFound("Could not update the coin data {}".format(e))
 
-        # Save the updates
-        singleCurrency.save()
         
         # serialize the response object and pass it back
         serializer = CurrencySerializer(singleCurrency, many=False)
         return Response(serializer.data)
     
     # Delete method that will remove a currency from the database
-    def delete(self, request, coin_symbol):
+    def delete(self, request, symbol):
         
         try:
             # Find the currency in the database
-            singleCurrency = Currency.objects.get(symbol=coin_symbol)
+            singleCurrency = Currency.objects.get(symbol=symbol)
         
         except Currency.DoesNotExist:
             # Custom error message to return if coin is not found
-            raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
+            raise ObjectNotFound("Could not find the currency, "+str(symbol)+".")
             
-        # Delete the selected currency    
-        singleCurrency.delete()
+        try:    
+            # Delete the selected currency    
+            singleCurrency.delete()
         
+        except Exception as e:
+            # Custom error message to return if coin cannot be deleted
+            raise ObjectNotFound("Could not delete the coin {}".format(e))
+            
         # Send response
-        return Response("Removed currency,"+coin_symbol+".")
+        return Response("Removed currency,"+symbol+".")
         
 
 class CurrenciesView(APIView):
@@ -288,10 +318,10 @@ class CurrenciesView(APIView):
         try:
             # look for the currency in the database
             listCurrencies = Currency.objects.all()
-            
-        except Currency.DoesNotExist:
-            # Custom error message to return if coin is not found
-            raise ObjectNotFound("No currencies exist.")
+        
+        except Exception as e:
+            # Custom error message to return if no coins exist
+            raise ObjectNotFound("No currencies exist. {}".format(e))
         
         # Serialize the response
         serializer = CurrencySerializer(listCurrencies, many=True)
@@ -314,14 +344,18 @@ class AlertsView(APIView):
             # look for the User in the database
             theUser = User.objects.get(username=user_name)
             
+        except Exception as e:
+            # Custom error message to return if user cannot be found
+            raise ObjectNotFound("Could not find the user. {}".format(e))
+            
+        try:    
             # Look for the alert in the database
             getAlerts = theUser.extenduser.alerts.all()
         
-        # Custom Error Handling
-        except User.DoesNotExist:
-            # Custom error message to return if user is not found
-            raise ObjectNotFound("Could not find the user, "+str(user_name)+".")  
-              
+        except Exception as e:
+            # Custom error message to return if user does not have alerts
+            raise ObjectNotFound("Could not find user alerts. {}".format(e))
+        
         
         # Serialize the response
         serializer = CurrencySerializer(getAlerts, many=True)
