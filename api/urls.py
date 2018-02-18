@@ -5,6 +5,9 @@ urlpatterns = [
     #Request specific user information (GET), Update a specific user (POST), or Remove a specific user (DELETE)
     path('user/<str:user_name>', views.UserView.as_view()), 
     
+    #Update a specific user's password(POST)
+    path('user/<str:user_name/cp>', views.UserPasswordChangeView.as_view()), 
+    
     #Create a new user (PUT)
     path('user/', views.UserView.as_view()), 
     

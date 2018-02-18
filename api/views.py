@@ -120,6 +120,35 @@ class UserView(APIView):
         
         # Return a response
         return Response("Removed user,"+user_name+".")
+        
+#------------------------------------------------
+#Begin View for User Password Change        
+#------------------------------------------------
+        
+class UserPasswordChangeView(APIView):
+    
+    def post(self, request, user_name):
+        
+        # I get the content from the body request and convert it into a dictionary
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        
+        # Look for the user in the database and update the properties 
+        # based on what came from the request
+        theUser = User.objects.get(username=user_name)
+        theUser.password = body['password']
+        
+        try:
+            # Save the new user
+            theUser.save()
+        
+        except Exception as e:
+
+            raise ObjectNotFound("Could not save the User  {}".format(e))
+        
+        # Serialize the response object and pass it back
+        serializer = UserSerializer(theUser, many=False)
+        return Response(serializer.data)
       
       
 #------------------------------------------------
