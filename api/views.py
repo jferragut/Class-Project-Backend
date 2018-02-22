@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse
 from .utils import ObjectNotFound
+from django.core.mail import send_mail
 
 #import models and serializer
 from .models import Currency, ExtendUser
@@ -458,3 +459,18 @@ class UpdateAlertsView(APIView):
         
         # Send response
         return Response("Removed currency,"+coin_symbol+" from alerts.")
+        
+#------------------------------------------------
+# Begin View for Email Correspondence 
+#------------------------------------------------
+
+class EmailsView(APIView):
+    
+    def post(self, request):
+        send_mail(
+        'IMPORTANT',
+        'Hello World',
+        'innecco9@gmail.com',
+        ['innecco7@gmail.com'],
+        fail_silently=False,
+        )
