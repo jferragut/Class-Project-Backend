@@ -32,6 +32,7 @@ urlpatterns = [
     #Request a list of all currencies
     path('currencies/', views.CurrenciesView.as_view()),
     
-    path('email/', views.EmailsView.as_view()),
+    path('email/<str:user_name>', views.EmailsView.as_view()),
+    
     
 ]

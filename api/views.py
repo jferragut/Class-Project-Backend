@@ -4,7 +4,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse
 from .utils import ObjectNotFound
+from django.core.files import File
 from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.template.loader import get_template
 
 #import models and serializer
 from .models import Currency, ExtendUser
@@ -467,10 +472,27 @@ class UpdateAlertsView(APIView):
 class EmailsView(APIView):
     
     def post(self, request):
-        send_mail(
-        'IMPORTANT',
-        'Hello World',
-        'innecco9@gmail.com',
-        ['innecco7@gmail.com'],
-        fail_silently=False,
-        )
+        subject, from_email, to = 'hello', 'Gabriel Innecco <innecco9@gmail.com>', 'innecco7@gmail.com'
+        text_content = 'This is an important message.'
+        
+        #theUser = User.objects.get(username=user_name)
+        
+        # render data in html and attach in the mail
+        t = get_template('template.html')
+        ctx = {
+            'name': 'Gabe' #theUser.username
+        }
+        
+        html = t.render(ctx)
+        
+        #html_content = '<p>This is an <strong>important</strong> message.</p>'
+        email = EmailMultiAlternatives(subject, text_content, from_email, [to])
+        email.attach_alternative(html, "text/html")
+        email.send()
+        
+        return HttpResponse(html)
+            
+        
+
+        
+        
