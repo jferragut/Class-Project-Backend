@@ -20,9 +20,12 @@ urlpatterns = [
     #Add (PUT) or Delete currency(DELETE) from Alerts
     path('user/<str:user_name>/alert/<str:coin_symbol>', views.UpdateAlertsView.as_view()), 
     
-    #Request user Alerts (GET)
-    path('user/<str:user_name>/alert', views.AlertsView.as_view()),
+    #Request Alert(GET) from database  
+    path('coinalert/', views.CoinAlertsView.as_view()),
     
+    #Add (PUT) or Delete alert(DELETE) from database
+    path('coinalert/<str:symbol>/<str:alert_type>', views.CoinAlertsView.as_view()),
+
     #Request an individual currency's information(GET), update (POST), or delete (DELETE) a currency from the database
     path('currency/<str:symbol>', views.CurrencyView.as_view()),
     

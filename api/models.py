@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
+
 # Standard model that defines all Coin Data
 class Currency(models.Model):
     name = models.CharField(max_length=20)
@@ -25,6 +26,13 @@ class Currency(models.Model):
     # Redefine the string response to be more explicit
     def __str__(self):
         return (self.name+" "+self.symbol)
+
+class CoinAlert(models.Model):
+    coin = models.ForeignKey(Currency, on_delete=models.CASCADE,null=True)
+    alert_type = models.CharField(max_length=7)
+    
+    def __str__(self):
+        return (str(self.coin)+" "+self.alert_type)
 
 # ExtendUser will extend the user model to include some additional fields
 class ExtendUser(models.Model):
@@ -55,5 +63,3 @@ def create_user_extenduser(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_extenduser(sender, instance, **kwargs):
     instance.extenduser.save()
-
-
