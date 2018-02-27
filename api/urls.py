@@ -32,10 +32,10 @@ urlpatterns = [
     #Add a new currency (PUT)
     path('currency/', views.CurrencyView.as_view()),
     
-    #Request a list of all currencies
+    #Request a list of all currencies (GET)
     path('currencies/', views.CurrenciesView.as_view()),
     
-    path('email/<str:user_name>', views.EmailsView.as_view()),
-    
+    #Request a json for a given subreddit (GET)
+    path('reddit/<str:coin>', views.RedditView.as_view()),
     
 ]
