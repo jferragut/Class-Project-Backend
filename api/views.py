@@ -54,16 +54,30 @@ class UserView(APIView):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
+        
         today = datetime.today()
         
-        # Define what the prototype is for a user and grab data from the dictionary
-        newUser = User(username=body['username'],first_name=body['first_name'],last_name=body['last_name'],email=body['email'],
-        password=body['password'],is_active=body['is_active'],last_login=today.strftime("%Y-%m-%d %H:%M:%S"),date_joined=today.strftime("%Y-%m-%d %H:%M:%S"))
-
         try:
+            
+            # Define what the prototype is for a user and grab data from the dictionary
+            newUser = User(username=body['username'],first_name=body['first_name'],last_name=body['last_name'],
+            email=body['email'],password=body['password'],is_active=body['is_active'] )
+            
             # Save the new user
             newUser.save()
+
+        except Exception as e:
+
+            raise ObjectNotFound("Could not save the User {}".format(e))
+        
+        try:
             
+            # Define what the prototype is for a user and grab data from the dictionary
+            newUser = User.extenduser(email_contact=body['email_contact'],subscription_status=body['subscription_status'])
+            
+            # Save the new user
+            newUser.extenduser.save()
+
         except Exception as e:
 
             raise ObjectNotFound("Could not save the User {}".format(e))
