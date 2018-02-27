@@ -11,8 +11,17 @@ admin.autodiscover()
 
 #import models and serializer
 from api.models import Currency, ExtendUser
+from django.core.files import File
+from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.template.loader import get_template
+
+#import models and serializer
+from .models import Currency, ExtendUser, CoinAlert
 from django.contrib.auth.models import User
-from .serializable import CurrencySerializer, UserSerializer
+from .serializable import CurrencySerializer, UserSerializer, CoinAlertSerializer
 
 
          
@@ -121,6 +130,35 @@ class UserView(APIView):
         
         # Return a response
         return Response("Removed user,"+user_name+".")
+        
+#------------------------------------------------
+#Begin View for User Password Change        
+#------------------------------------------------
+        
+class UserPasswordChangeView(APIView):
+    
+    def post(self, request, user_name):
+        
+        # I get the content from the body request and convert it into a dictionary
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        
+        # Look for the user in the database and update the properties 
+        # based on what came from the request
+        theUser = User.objects.get(username=user_name)
+        theUser.password = body['password']
+        
+        try:
+            # Save the new user
+            theUser.save()
+        
+        except Exception as e:
+
+            raise ObjectNotFound("Could not save the User  {}".format(e))
+        
+        # Serialize the response object and pass it back
+        serializer = UserSerializer(theUser, many=False)
+        return Response(serializer.data)
       
       
 #------------------------------------------------
@@ -350,33 +388,71 @@ class CurrenciesView(APIView):
 # Begin Views for Alerts 
 #------------------------------------------------
 
-class AlertsView(APIView):
+class CoinAlertsView(APIView):
     
-    # Get method that returns all coins that the user is being alerted for
-    def get(self, request, user_name):
+    def get(self, request, symbol, alert_type):
+        try:
+            # Look for the alert in the database
+            singleAlert = CoinAlert.objects.get(symbol=symbol)
+        
+        except Exception as e:
+            # Custom error message to return if coin could not be updated
+            raise ObjectNotFound("Could not find the alert {}".format(e))
+        
+        # Serialize the alert
+        serializer = CoinAlertSerializer(singleAlert, many=False)
+        
+        # Return the alert
+        return Response(serializer.data)
+    
+    # (PUT) Method that adds an alert to the database
+    def put(self, request, symbol, alert_type):
+        
+        try: 
+            
+            singleCurrency = Currency.objects.get(symbol=symbol)
+            
+            # Define what the prototype is for a user and grab data from the dictionary
+            newAlert = CoinAlert(coin=singleCurrency,alert_type=alert_type)
+            
+            # Save the new alert
+            newAlert.save()
+        
+        except Exception as e:
+            # Custom error message to return if the alert could not be created
+            raise ObjectNotFound("Could not create the alert {}".format(e))
+            
+        # Serialize the new alert data
+        serializer = CoinAlertSerializer(newAlert, many=False)
+        
+        # Return the alert
+        return Response(serializer.data)
+     
+    # (P    
+    def delete(self, request, symbol, alert_type):
         
         try:
-            # look for the User in the database
-            theUser = User.objects.get(username=user_name)
-            
-        except Exception as e:
-            # Custom error message to return if user cannot be found
-            raise ObjectNotFound("Could not find the user. {}".format(e))
+            # Find the alert in the database
+            singleAlert = Alert.objects.get(symbol=symbol)
+        
+        except Alert.DoesNotExist:
+            # Custom error message to return if coin is not found
+            raise ObjectNotFound("Could not find the Alert, "+str(symbol)+".")
             
         try:    
-            # Look for the alert in the database
-            getAlerts = theUser.extenduser.alerts.all()
+            # Delete the selected alert   
+            singleAlert.delete()
         
         except Exception as e:
-            # Custom error message to return if user does not have alerts
-            raise ObjectNotFound("Could not find user alerts. {}".format(e))
+            # Custom error message to return if coin cannot be deleted
+            raise ObjectNotFound("Could not delete the alert {}".format(e))
+            
+        # Send response
+        return Response("Removed currency,"+symbol+".")
         
+    
         
-        # Serialize the response
-        serializer = CurrencySerializer(getAlerts, many=True)
-        
-        # Return the list of alerts
-        return Response(serializer.data)
+
         
 class UpdateAlertsView(APIView):
     
@@ -439,6 +515,7 @@ class UpdateAlertsView(APIView):
         return Response("Removed currency,"+coin_symbol+" from alerts.")
 
 
+<<<<<<< HEAD
 
 #------------------------------------------------
 # Begin View for Reddit Request 
@@ -462,3 +539,37 @@ class RedditView(APIView):
         # Return the json object
         return Response(r)
 
+=======
+#------------------------------------------------
+# Begin View for Email Correspondence 
+#------------------------------------------------
+
+
+class EmailsView(APIView):
+    
+    def post(self, request):
+        subject, from_email, to = 'hello', 'Gabriel Innecco <innecco9@gmail.com>', 'innecco7@gmail.com'
+        text_content = 'This is an important message.'
+        
+        #theUser = User.objects.get(username=user_name)
+        
+        # render data in html and attach in the mail
+        t = get_template('template.html')
+        ctx = {
+            'name': 'Gabe' #theUser.username
+        }
+        
+        html = t.render(ctx)
+        
+        #html_content = '<p>This is an <strong>important</strong> message.</p>'
+        email = EmailMultiAlternatives(subject, text_content, from_email, [to])
+        email.attach_alternative(html, "text/html")
+        email.send()
+        
+        return HttpResponse(html)
+            
+        
+
+        
+        
+>>>>>>> f08afef016c843dce91d3c5652c95676ef1803c7
