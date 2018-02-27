@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from .utils import ObjectNotFound
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 from django.contrib import admin
+import datetime
 admin.autodiscover()
 
 #import models and serializer
@@ -30,10 +31,6 @@ from .serializable import CurrencySerializer, UserSerializer, CoinAlertSerialize
 #------------------------------------------------
         
 class UserView(APIView):
-    
-    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
     
     # Get method that will return a given user's information
     def get(self, request, user_name):
@@ -63,10 +60,7 @@ class UserView(APIView):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-
-        
-        today = datetime.today()
-        
+        today = datetime.date.today()
 
         try:
             
@@ -81,17 +75,20 @@ class UserView(APIView):
 
             raise ObjectNotFound("Could not save the User {}".format(e))
         
-        try:
+        # try:
             
-            # Define what the prototype is for a user and grab data from the dictionary
-            newUser = User.extenduser(email_contact=body['email_contact'],subscription_status=body['subscription_status'])
+        #     Define what the prototype is for a user and grab data from the dictionary
+        #     eUser = ExtendUser(
+        #         email_contact=body['email_contact'],
+        #         user=newUser,
+        #         subscription_status=body['subscription_status'])
             
-            # Save the new user
-            newUser.extenduser.save()
+        #     Save the new user
+        #     #eUser.save()
 
-        except Exception as e:
+        # except Exception as e:
 
-            raise ObjectNotFound("Could not save the User {}".format(e))
+        #     raise ObjectNotFound("Could not save the User {}".format(e))
 
         # Serialize the response object and pass it back
         serializer = UserSerializer(newUser, many=False)
@@ -533,7 +530,7 @@ class UpdateAlertsView(APIView):
         return Response("Removed currency,"+coin_symbol+" from alerts.")
 
 
-<<<<<<< HEAD
+
 
 #------------------------------------------------
 # Begin View for Reddit Request 
@@ -557,7 +554,7 @@ class RedditView(APIView):
         # Return the json object
         return Response(r)
 
-=======
+
 #------------------------------------------------
 # Begin View for Email Correspondence 
 #------------------------------------------------
@@ -590,4 +587,4 @@ class EmailsView(APIView):
 
         
         
->>>>>>> f08afef016c843dce91d3c5652c95676ef1803c7
+
