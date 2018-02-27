@@ -10,6 +10,7 @@ from .utils import ObjectNotFound
 from django_cron import CronJobBase, Schedule
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 from django.contrib import admin
+import datetime
 admin.autodiscover()
 
 #import models and serializer
@@ -33,10 +34,6 @@ from .serializable import CurrencySerializer, UserSerializer, CoinAlertSerialize
 #------------------------------------------------
         
 class UserView(APIView):
-    
-    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
     
     # Get method that will return a given user's information
     def get(self, request, user_name):
@@ -66,17 +63,35 @@ class UserView(APIView):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-        # Define what the prototype is for a user and grab data from the dictionary
-        newUser = User(username=body['username'],first_name=body['first_name'],last_name=body['last_name'],email=body['email'],
-        password=body['password'],is_active=body['is_active'])
+        today = datetime.date.today()
 
         try:
+            
+            # Define what the prototype is for a user and grab data from the dictionary
+            newUser = User(username=body['username'],first_name=body['first_name'],last_name=body['last_name'],
+            email=body['email'],password=body['password'],is_active=body['is_active'] )
+            
             # Save the new user
             newUser.save()
-            
+
         except Exception as e:
 
             raise ObjectNotFound("Could not save the User {}".format(e))
+        
+        # try:
+            
+        #     Define what the prototype is for a user and grab data from the dictionary
+        #     eUser = ExtendUser(
+        #         email_contact=body['email_contact'],
+        #         user=newUser,
+        #         subscription_status=body['subscription_status'])
+            
+        #     Save the new user
+        #     #eUser.save()
+
+        # except Exception as e:
+
+        #     raise ObjectNotFound("Could not save the User {}".format(e))
 
         # Serialize the response object and pass it back
         serializer = UserSerializer(newUser, many=False)
@@ -609,3 +624,8 @@ class MySQLSync(CronJobBase):
             coin.save()
             
             print(coin)
+=======
+        
+        
+
+>>>>>>> 36ee01b77dfd5812a604d3737ec43cdd06c56ddc
