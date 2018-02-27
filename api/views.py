@@ -1,17 +1,18 @@
 import json
-from rest_framework import status
+import requests
+from rest_framework import permissions, routers, serializers, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse
 from .utils import ObjectNotFound
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
+from django.contrib import admin
+admin.autodiscover()
 
 #import models and serializer
-from .models import Currency, ExtendUser
+from api.models import Currency, ExtendUser
 from django.contrib.auth.models import User
 from .serializable import CurrencySerializer, UserSerializer
-
-import datetime as dt
-from datetime import datetime
 
 
          
@@ -21,10 +22,15 @@ from datetime import datetime
         
 class UserView(APIView):
     
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    
     # Get method that will return a given user's information
     def get(self, request, user_name):
         
         try:
+
             # look for the User in the database
             theUser = User.objects.get(username=user_name)
             
@@ -48,11 +54,9 @@ class UserView(APIView):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-        today = datetime.today()
-        
         # Define what the prototype is for a user and grab data from the dictionary
         newUser = User(username=body['username'],first_name=body['first_name'],last_name=body['last_name'],email=body['email'],
-        password=body['password'],is_active=body['is_active'],last_login=today.strftime("%Y-%m-%d %H:%M:%S"),date_joined=today.strftime("%Y-%m-%d %H:%M:%S"))
+        password=body['password'],is_active=body['is_active'])
 
         try:
             # Save the new user
@@ -76,8 +80,6 @@ class UserView(APIView):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-        today = datetime.today()
-        
         # Look for the user in the database and update the properties 
         # based on what came from the request
         theUser = User.objects.get(username=user_name)
@@ -87,7 +89,6 @@ class UserView(APIView):
         theUser.email = body['email']
         theUser.password = body['password']
         theUser.is_active = body['is_active']
-        theUser.last_login = last_login=today.strftime("%Y-%m-%d %H:%M:%S")
         theUser.extenduser.email_contact = body['email_contact']
         theUser.extenduser.subscription_status = body['subscription_status']
         
@@ -169,8 +170,10 @@ class UserWatchlistView(APIView):
             # Custom error message to return if coin is not found
             raise ObjectNotFound("Could not find the currency, "+str(coin_symbol)+".")
         
+        newWatchlist = theUser.extenduser.watchlist.all()
+        
         # Serialize the currency data    
-        serializer = CurrencySerializer(theCoin, many=False)
+        serializer = CurrencySerializer(newWatchlist, many=True)
         
         # Return the object
         return Response(serializer.data)
@@ -196,8 +199,13 @@ class UserWatchlistView(APIView):
         # Remove the coin from watchlist
         theUser.extenduser.watchlist.remove(theCoin)
         
-        # Send response
-        return Response("Removed currency,"+coin_symbol+" from watchlist.")
+        newWatchlist = theUser.extenduser.watchlist.all()
+        
+        # Serialize the currency data    
+        serializer = CurrencySerializer(newWatchlist, many=True)
+        
+        # Return the object
+        return Response(serializer.data)
         
         
 #------------------------------------------------
@@ -318,7 +326,7 @@ class CurrencyView(APIView):
         
 
 class CurrenciesView(APIView):
-    
+    permission_classes = [permissions.IsAuthenticated]
     # Get method that will return a list of all currencies in the database
     def get(self, request):
         
@@ -429,3 +437,28 @@ class UpdateAlertsView(APIView):
         
         # Send response
         return Response("Removed currency,"+coin_symbol+" from alerts.")
+
+
+
+#------------------------------------------------
+# Begin View for Reddit Request 
+#------------------------------------------------
+
+class RedditView(APIView):
+    
+    # Get method that returns a subreddit to embed based upon
+    def get(self, request, coin):
+        
+        try:
+            # create the URL for the request
+            url = "https://www.reddit.com/r/%s.json" % (coin)
+            # setup the request
+            r = requests.get(url)
+            
+        except Exception as e:
+            # Custom error message to return if request cannot be processed
+            raise ObjectNotFound("Could not process the request. {}".format(e))
+            
+        # Return the json object
+        return Response(r)
+

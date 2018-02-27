@@ -35,7 +35,7 @@ class ExtendUser(models.Model):
     # Define additional fields to create
     email_contact = models.BooleanField(default=True)
     subscription_status = models.BooleanField(default=True)
-    
+
     # The watchlist and alerts fields aren't an actual fields but rather a  
     # N to N with the Currency table
     watchlist = models.ManyToManyField(Currency,default="",related_name='user_watchlist')
