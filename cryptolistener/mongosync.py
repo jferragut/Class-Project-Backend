@@ -25,6 +25,7 @@ class SyncDB(object):
             theCoin = Asset.objects(name=coin['name']).first()
             if theCoin is None:
                 theCoin = Asset()
+            theCoin.name = coin['name']
             theCoin.symbol = coin['symbol']
             theCoin.rank = coin['rank']
             theCoin.price_usd = coin['price_usd']

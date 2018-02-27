@@ -1,10 +1,13 @@
 import json
 import requests
+from mongoengine import *
+from cryptolistener.mongosync import Asset
 from rest_framework import permissions, routers, serializers, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse
 from .utils import ObjectNotFound
+from django_cron import CronJobBase, Schedule
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 from django.contrib import admin
 admin.autodiscover()
@@ -515,7 +518,6 @@ class UpdateAlertsView(APIView):
         return Response("Removed currency,"+coin_symbol+" from alerts.")
 
 
-<<<<<<< HEAD
 
 #------------------------------------------------
 # Begin View for Reddit Request 
@@ -539,7 +541,6 @@ class RedditView(APIView):
         # Return the json object
         return Response(r)
 
-=======
 #------------------------------------------------
 # Begin View for Email Correspondence 
 #------------------------------------------------
@@ -567,9 +568,44 @@ class EmailsView(APIView):
         email.send()
         
         return HttpResponse(html)
-            
-        
 
+
+#------------------------------------------------
+# Begin View for MySQL Sync 
+#------------------------------------------------
+
+
+class MySQLSync(CronJobBase):
+    
+    RUN_EVERY_MINS = 1 # every 2 hours
+
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'mySQLsync'    # a unique code
+
+    def do(self):
+        print("Everything is connected.")
         
+        connect('cryptolistener')
         
->>>>>>> f08afef016c843dce91d3c5652c95676ef1803c7
+        for coin in Currency:
+            theList = Asset.objects(symbol=Currency.symbol)
+            
+            aux = theList[0:5].price_usd
+            tickerList = ','.join(aux)
+            
+            coin.name = theList[0:1].name
+            coin.symbol = theList[0:1].symbol
+            coin.rank = theList[0:1].rank
+            #coin.price_usd = theList[0:1].price_usd
+            coin.price_usd = 2
+            coin.volume_24h_usd = theList[0:1].volume_24h_usd
+            coin.market_cap_usd = theList[0:1].market_cap_usd
+            coin.available_supply = theList[0:1].available_supply
+            coin.total_supply = theList[0:1].total_supply
+            coin.percent_change_1h = theList[0:1].percent_change_1h
+            coin.percent_change_24h = theList[0:1].percent_change_24h
+            coin.percent_change_7d = theList[0:1].percent_change_7d
+            coin.ticker_history = tickerList
+            coin.save()
+            
+            print(coin)
