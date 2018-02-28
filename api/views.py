@@ -598,29 +598,26 @@ class MySQLSync(CronJobBase):
     code = 'mySQLsync'    # a unique code
 
     def do(self):
+        connect('cryptolistener')
         print("Everything is connected.")
         
-        connect('cryptolistener')
-        
         for coin in Currency:
-            theList = Asset.objects(symbol=Currency.symbol)
+            theList = Asset.objects(symbol=coin.symbol)
             
-            aux = theList[0:5].price_usd
-            tickerList = ','.join(aux)
+            # aux = theList[0:5].price_usd
+            # tickerList = ','.join(aux)
             
-            coin.name = theList[0:1].name
-            coin.symbol = theList[0:1].symbol
-            coin.rank = theList[0:1].rank
-            #coin.price_usd = theList[0:1].price_usd
-            coin.price_usd = 2
-            coin.volume_24h_usd = theList[0:1].volume_24h_usd
-            coin.market_cap_usd = theList[0:1].market_cap_usd
-            coin.available_supply = theList[0:1].available_supply
-            coin.total_supply = theList[0:1].total_supply
-            coin.percent_change_1h = theList[0:1].percent_change_1h
-            coin.percent_change_24h = theList[0:1].percent_change_24h
-            coin.percent_change_7d = theList[0:1].percent_change_7d
+            coin.name = theList[0].name
+            coin.symbol = theList[0].symbol
+            coin.rank = theList[0].rank
+            coin.price_usd = theList[0].price_usd
+            coin.volume_24h_usd = theList[0].volume_24h_usd
+            coin.market_cap_usd = theList[0].market_cap_usd
+            coin.available_supply = theList[0].available_supply
+            coin.total_supply = theList[0].total_supply
+            coin.percent_change_1h = theList[0].percent_change_1h
+            coin.percent_change_24h = theList[0].percent_change_24h
+            coin.percent_change_7d = theList[0].percent_change_7d
             coin.ticker_history = tickerList
             coin.save()
             
-            print(coin)
