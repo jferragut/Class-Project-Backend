@@ -15,6 +15,7 @@ class Currency(models.Model):
     market_cap_usd = models.CharField(max_length=20)
     available_supply = models.CharField(max_length=20)
     total_supply = models.CharField(max_length=20)
+    max_supply = models.CharField(max_length=20,default="0")
     percent_change_1h = models.CharField(max_length=10)
     percent_change_24h = models.CharField(max_length=10)
     percent_change_7d = models.CharField(max_length=10)

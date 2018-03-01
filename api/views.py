@@ -27,8 +27,13 @@ from django.template.loader import get_template
 from .models import Currency, ExtendUser, CoinAlert
 from django.contrib.auth.models import User
 from .serializable import CurrencySerializer, UserSerializer, CoinAlertSerializer
+from cryptolistener.mongosync import Asset
 
+# import the logging library
+import logging
 
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
          
 #------------------------------------------------
 #Begin Views for User        
@@ -266,7 +271,7 @@ class CurrencyView(APIView):
         try:
             # Look for the coin in the database
             singleCurrency = Currency.objects.get(symbol=symbol)
-        
+            
         except Exception as e:
             # Custom error message to return if coin could not be updated
             raise ObjectNotFound("Could not find the currency {}".format(e))
@@ -297,6 +302,7 @@ class CurrencyView(APIView):
             newCurrency.save()
         
         except Exception as e:
+            logger.error('Something went wrong!')
             # Custom error message to return if coin could not be created
             raise ObjectNotFound("Could not create the coin {}".format(e))
             
@@ -593,22 +599,31 @@ class MySQLSync(CronJobBase):
         connect('cryptolistener')
         print("Everything is connected.")
         
-        for coin in Currency:
+        Coins = Currency.objects.filter(id__gte=0).all()
+        
+        for coin in Coins:
             theList = Asset.objects(symbol=coin.symbol)
-            aux = theList[0:5].price_usd
+            listElements = theList[:5]
+            aux = map(lambda a: str(a.price_usd), listElements)
             tickerList = ','.join(aux)
-
-            coin.name = theList[0:1].name
-            coin.symbol = theList[0:1].symbol
-            coin.rank = theList[0:1].rank
-            coin.price_usd = theList[0:1].price_usd
-            coin.volume_24h_usd = theList[0:1].volume_24h_usd
-            coin.market_cap_usd = theList[0:1].market_cap_usd
-            coin.available_supply = theList[0:1].available_supply
-            coin.total_supply = theList[0:1].total_supply
-            coin.percent_change_1h = theList[0:1].percent_change_1h
-            coin.percent_change_24h = theList[0:1].percent_change_24h
-            coin.percent_change_7d = theList[0:1].percent_change_7d
+            
+            coin.rank = theList.first().rank
+            coin.name = theList.first().name
+            coin.symbol = theList.first().symbol
+            coin.price_usd = theList.first().price_usd
+            coin.volume_24h_usd = theList.first().volume_24h_usd
+            coin.market_cap_usd = theList.first().market_cap_usd
+            coin.available_supply = theList.first().available_supply
+            coin.total_supply = theList.first().total_supply
+            print(coin.name + " -> "+coin.max_supply)
+            if coin.max_supply is "":
+                coin.max_supply = "N/A"
+            elif coin.max_supply is None:
+                coin.max_supply = "N/A"
+            else:
+                coin.max_supply = theList.first().max_supply
+            coin.percent_change_1h = theList.first().percent_change_1h
+            coin.percent_change_24h = theList.first().percent_change_24h
+            coin.percent_change_7d = theList.first().percent_change_7d
             coin.ticker_history = tickerList
             coin.save()
-            

@@ -12,6 +12,7 @@ class Asset(Document):
     market_cap_usd = DecimalField(max_value=None,precision=2)
     available_supply = DecimalField(max_value=None,precision=2)
     total_supply = DecimalField(max_value=None,precision=2)
+    max_supply = DecimalField(max_value=None,precision=2)
     percent_change_1h = DecimalField(min_value=None,max_value=None,precision=2)
     percent_change_24h = DecimalField(min_value=None,max_value=None,precision=2)
     percent_change_7d = DecimalField(min_value=None,max_value=None,precision=2)
@@ -25,17 +26,33 @@ class SyncDB(object):
             theCoin = Asset.objects(name=coin['name']).first()
             if theCoin is None:
                 theCoin = Asset()
-            theCoin.name = coin['name']
-            theCoin.symbol = coin['symbol']
-            theCoin.rank = coin['rank']
-            theCoin.price_usd = coin['price_usd']
-            theCoin.volume_24h_usd = coin['24h_volume_usd']
-            theCoin.market_cap_usd = coin['market_cap_usd']
-            theCoin.total_supply = coin['max_supply']
-            theCoin.percent_change_1h = coin['percent_change_1h']
-            theCoin.percent_change_24h = coin['percent_change_24h']
-            theCoin.percent_change_7d = coin['percent_change_7d']
-            theCoin.save()
+                theCoin.name = coin['name']
+                theCoin.symbol = coin['symbol']
+                theCoin.rank = coin['rank']
+                theCoin.price_usd = coin['price_usd']
+                theCoin.volume_24h_usd = coin['24h_volume_usd']
+                theCoin.market_cap_usd = coin['market_cap_usd']
+                theCoin.available_supply = coin['available_supply']
+                theCoin.total_supply = coin['total_supply']
+                theCoin.max_supply = coin['max_supply']
+                theCoin.percent_change_1h = coin['percent_change_1h']
+                theCoin.percent_change_24h = coin['percent_change_24h']
+                theCoin.percent_change_7d = coin['percent_change_7d']
+                theCoin.save()
+            else:
+                theCoin.name = coin['name']
+                theCoin.symbol = coin['symbol']
+                theCoin.rank = coin['rank']
+                theCoin.price_usd = coin['price_usd']
+                theCoin.volume_24h_usd = coin['24h_volume_usd']
+                theCoin.market_cap_usd = coin['market_cap_usd']
+                theCoin.available_supply = coin['available_supply']
+                theCoin.total_supply = coin['total_supply']
+                theCoin.max_supply = coin['max_supply']
+                theCoin.percent_change_1h = coin['percent_change_1h']
+                theCoin.percent_change_24h = coin['percent_change_24h']
+                theCoin.percent_change_7d = coin['percent_change_7d']
+                theCoin.save()
             theCount = Asset.objects.count()  
         epoctime = time.time()        
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(epoctime))
