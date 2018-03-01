@@ -5,6 +5,7 @@ from cryptolistener.mongosync import Asset
 from rest_framework import permissions, routers, serializers, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from django.http import HttpResponse
 from .utils import ObjectNotFound
 from django_cron import CronJobBase, Schedule
@@ -55,49 +56,6 @@ class UserView(APIView):
         # Return the user object
         return Response(serializer.data)
         
-        
-    # Put method that will add a new user into the database
-    def put(self, request):
-        
-        # I get the content from the body request and convert it into a dictionary
-        body_unicode = request.body.decode('utf-8')
-        body = json.loads(body_unicode)
-        
-        today = datetime.date.today()
-
-        try:
-            
-            # Define what the prototype is for a user and grab data from the dictionary
-            newUser = User(username=body['username'],first_name=body['first_name'],last_name=body['last_name'],
-            email=body['email'],password=body['password'],is_active=body['is_active'] )
-            
-            # Save the new user
-            newUser.save()
-
-        except Exception as e:
-
-            raise ObjectNotFound("Could not save the User {}".format(e))
-        
-        # try:
-            
-        #     Define what the prototype is for a user and grab data from the dictionary
-        #     eUser = ExtendUser(
-        #         email_contact=body['email_contact'],
-        #         user=newUser,
-        #         subscription_status=body['subscription_status'])
-            
-        #     Save the new user
-        #     #eUser.save()
-
-        # except Exception as e:
-
-        #     raise ObjectNotFound("Could not save the User {}".format(e))
-
-        # Serialize the response object and pass it back
-        serializer = UserSerializer(newUser, many=False)
-
-        # Return the new user object
-        return Response(serializer.data)
     
     
     # Post method for updating a user record in the database
@@ -148,6 +106,39 @@ class UserView(APIView):
         
         # Return a response
         return Response("Removed user,"+user_name+".")
+        
+        
+class UserPutView(APIView): 
+    permission_classes = (AllowAny,)
+    authentication_classes = []
+    # Put method that will add a new user into the database
+    def put(self, request):
+        
+        # I get the content from the body request and convert it into a dictionary
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        
+        today = datetime.date.today()
+
+        try:
+            
+            # Define what the prototype is for a user and grab data from the dictionary
+            newUser = User(username=body['username'],first_name=body['first_name'],last_name=body['last_name'],
+            email=body['email'],password=body['password'],is_active=body['is_active'] )
+            
+            # Save the new user
+            newUser.save()
+
+        except Exception as e:
+
+            raise ObjectNotFound("Could not save the User {}".format(e))
+        
+
+        # Serialize the response object and pass it back
+        serializer = UserSerializer(newUser, many=False)
+
+        # Return the new user object
+        return Response(serializer.data)
         
 #------------------------------------------------
 #Begin View for User Password Change        
@@ -382,7 +373,8 @@ class CurrencyView(APIView):
         
 
 class CurrenciesView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = (AllowAny,)
+    authentication_classes = []
     # Get method that will return a list of all currencies in the database
     def get(self, request):
         

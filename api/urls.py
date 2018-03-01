@@ -9,7 +9,7 @@ urlpatterns = [
     path('user/<str:user_name/cp>', views.UserPasswordChangeView.as_view()), 
     
     #Create a new user (PUT)
-    path('user/', views.UserView.as_view()), 
+    path('user/', views.UserPutView.as_view()), 
     
     #add coin to Watchlist(PUT) or Delete from Watchlist(DELETE)
     path('user/<str:user_name>/watchlist/<str:coin_symbol>', views.UserWatchlistView.as_view()),
