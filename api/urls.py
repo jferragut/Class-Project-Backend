@@ -38,4 +38,6 @@ urlpatterns = [
     #Request a json for a given subreddit (GET)
     path('reddit/<str:coin>', views.RedditView.as_view()),
     
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    
 ]
